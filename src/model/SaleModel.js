@@ -92,4 +92,12 @@ Sales.belongsTo(PaymentMethods, {
   targetKey: "code",
   onDelete: "CASCADE",
 });
+
+// Add hasMany relationship for SaleItemsDetail
+Sales.hasMany(require("./SaleItemDetail"), {
+  foreignKey: "sale_id",
+  sourceKey: "sale_id",
+  as: "SaleItemsDetails",
+});
+
 module.exports = Sales;

@@ -62,6 +62,13 @@ Order.belongsTo(Customers,{
     foreignKey: "customer_id",
     targetKey: "customer_id",
     onDelete: "CASCADE",
-})
+});
+
+// Add hasMany relationship for OrderItems
+Order.hasMany(require("./OrderItem"), {
+  foreignKey: "order_id",
+  sourceKey: "order_id",
+  as: "OrderItems",
+});
 
 module.exports = Order;

@@ -12,6 +12,13 @@ var CategoryRoute = require("./src/route/CategoryRoute");
 var BrandRoute = require("./src/route/BrandRoute");
 var CustomerRoute = require("./src/route/CustomerRoute");
 var UserRoute = require("./src/route/UserRoute");
+var SaleRoute = require("./src/route/Saleroute");
+var OrderRoute = require("./src/route/OrderRoute");
+var PaymentMethodRoute = require("./src/route/PaymentMethodRoute");
+var SettingRoute = require("./src/route/SettingRoute");
+var StoreInfoRoute = require("./src/route/StoreInfoRoute");
+var GeneralSettingRoute = require("./src/route/GeneralSettingRoute");
+var TelegramRoute = require("./src/route/TelegramRoute");
 
 // Importing routes to be used in server.js /index.js
 //===========================================================
@@ -64,6 +71,13 @@ ProductRoute(app);
 CategoryRoute(app);
 BrandRoute(app);
 CustomerRoute(app);
+SaleRoute(app);
+OrderRoute(app);
+PaymentMethodRoute(app);
+SettingRoute(app);
+StoreInfoRoute(app);
+GeneralSettingRoute(app);
+TelegramRoute(app);
 
 //Route to Controller
 //====================================
