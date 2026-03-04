@@ -8,20 +8,20 @@ const createProduct = async (req, res) => {
 
     if (!product) {
       return res.status(400).json({
-        status: false,
+        success: false,
         message: "Failed to create product",
       });
     }
 
     return res.status(201).json({
-      status: true,
+      success: true,
       message: "Product created successfully",
       product,
     });
 
   } catch (error) {
     res.status(500).json({
-      status: false,
+      success: false,
       message: "Error creating product",
       error,
     });
@@ -36,11 +36,17 @@ const getAllProducts = async (req, res) => {
         { model: Brands, as: "brand" },
       ],
     });
-    return res.status(200).json(products);
+    return res.status(200).json({
+      success: true,
+      message: "success get products",
+      products,
+    });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error retrieving products", error });
+    return res.status(500).json({ 
+      success: false,
+      message: "Error retrieving products", 
+      error 
+    });
   }
 };
 
@@ -59,11 +65,22 @@ const getProductById = async (req, res) => {
       ],
     });
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ 
+        success: false,
+        message: "Product not found" 
+      });
     }
-    return res.status(200).json(product);
+    return res.status(200).json({
+      success: true,
+      message: "success get product",
+      product,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Error retrieving product", error });
+    return res.status(500).json({ 
+      success: false,
+      message: "Error retrieving product", 
+      error 
+    });
   }
 };
 
@@ -84,6 +101,14 @@ const updateProduct = async (req, res) => {
       photo,
     } = req.body;
     const product = await Products.findByPk(id);
+    
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    
     await product.update({
       prd_name,
       category_id,
@@ -98,11 +123,16 @@ const updateProduct = async (req, res) => {
       photo,
     });
     res.status(200).json({
+      success: true,
       message: "Product updated successfully",
       product,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error updating product", error });
+    res.status(500).json({ 
+      success: false,
+      message: "Error updating product", 
+      error 
+    });
   }
 };
 
@@ -110,13 +140,26 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Products.findByPk(id);
+    
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    
     await product.destroy();
     res.status(200).json({
+      success: true,
       message: "Product deleted successfully",
       product,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting product", error });
+    res.status(500).json({ 
+      success: false,
+      message: "Error deleting product", 
+      error 
+    });
   }
 };
 

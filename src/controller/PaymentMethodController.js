@@ -1,17 +1,33 @@
-const PaymentMethod = require("../model/PaymentMethodModel");
-const logError = require("../util/service");
+const { Op } = require("sequelize");
+const PaymentMethods = require("../model/PaymentMethodModel");
 
 // GET all payment methods
 const getAllPaymentMethods = async (req, res) => {
   try {
-    const paymentMethods = await PaymentMethod.findAll();
+    const { search = "" } = req.query;
+
+    const whereClause = {};
+    if (search) {
+      whereClause[Op.or] = [
+        { code: { [Op.like]: `%${search}%` } },
+        { type: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const paymentMethods = await PaymentMethods.findAll({
+      where: whereClause,
+      order: [["code", "ASC"]],
+    });
+
     res.status(200).json({
       success: true,
-      message: "Payment methods retrieved successfully",
-      data: paymentMethods,
+      data: paymentMethods.map((pm) => ({
+        ...pm.toJSON(),
+        status: pm.is_active === 1 ? "Active" : "Inactive",
+      })),
     });
   } catch (error) {
-    logError("PaymentMethodController", error, res);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -19,43 +35,66 @@ const getAllPaymentMethods = async (req, res) => {
 const getPaymentMethodByCode = async (req, res) => {
   try {
     const { code } = req.params;
-    const paymentMethod = await PaymentMethod.findByPk(code);
-    
+    const paymentMethod = await PaymentMethods.findByPk(code);
+
     if (!paymentMethod) {
       return res.status(404).json({
         success: false,
         message: "Payment method not found",
       });
     }
-    
+
     res.status(200).json({
       success: true,
-      data: paymentMethod,
+      data: {
+        ...paymentMethod.toJSON(),
+        status: paymentMethod.is_active === 1 ? "Active" : "Inactive",
+      },
     });
   } catch (error) {
-    logError("PaymentMethodController", error, res);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // POST create payment method
 const createPaymentMethod = async (req, res) => {
   try {
-    const { code, type, is_active, fee } = req.body;
-    
-    const paymentMethod = await PaymentMethod.create({
+    const { code, type, fee, status } = req.body;
+
+    // Validate required fields
+    if (!code || !type) {
+      return res.status(400).json({
+        success: false,
+        message: "Code and type are required",
+      });
+    }
+
+    // Check if payment method already exists
+    const existing = await PaymentMethods.findByPk(code);
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment method with this code already exists",
+      });
+    }
+
+    const newPaymentMethod = await PaymentMethods.create({
       code,
       type,
-      is_active,
-      fee,
+      fee: fee || 0,
+      is_active: status === "Active" ? 1 : 0,
     });
-    
+
     res.status(201).json({
       success: true,
       message: "Payment method created successfully",
-      data: paymentMethod,
+      data: {
+        ...newPaymentMethod.toJSON(),
+        status: newPaymentMethod.is_active === 1 ? "Active" : "Inactive",
+      },
     });
   } catch (error) {
-    logError("PaymentMethodController", error, res);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -63,30 +102,32 @@ const createPaymentMethod = async (req, res) => {
 const updatePaymentMethod = async (req, res) => {
   try {
     const { code } = req.params;
-    const { type, is_active, fee } = req.body;
-    
-    const paymentMethod = await PaymentMethod.findByPk(code);
-    
+    const { type, fee, status } = req.body;
+
+    const paymentMethod = await PaymentMethods.findByPk(code);
     if (!paymentMethod) {
       return res.status(404).json({
         success: false,
         message: "Payment method not found",
       });
     }
-    
+
     await paymentMethod.update({
-      type,
-      is_active,
-      fee,
+      type: type || paymentMethod.type,
+      fee: fee !== undefined ? fee : paymentMethod.fee,
+      is_active: status === "Active" ? 1 : status === "Inactive" ? 0 : paymentMethod.is_active,
     });
-    
+
     res.status(200).json({
       success: true,
       message: "Payment method updated successfully",
-      data: paymentMethod,
+      data: {
+        ...paymentMethod.toJSON(),
+        status: paymentMethod.is_active === 1 ? "Active" : "Inactive",
+      },
     });
   } catch (error) {
-    logError("PaymentMethodController", error, res);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -94,23 +135,23 @@ const updatePaymentMethod = async (req, res) => {
 const deletePaymentMethod = async (req, res) => {
   try {
     const { code } = req.params;
-    const paymentMethod = await PaymentMethod.findByPk(code);
-    
+
+    const paymentMethod = await PaymentMethods.findByPk(code);
     if (!paymentMethod) {
       return res.status(404).json({
         success: false,
         message: "Payment method not found",
       });
     }
-    
+
     await paymentMethod.destroy();
-    
+
     res.status(200).json({
       success: true,
       message: "Payment method deleted successfully",
     });
   } catch (error) {
-    logError("PaymentMethodController", error, res);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

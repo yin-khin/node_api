@@ -41,7 +41,13 @@ const getAllSales = async (req, res) => {
       ];
     }
     if (startDate && endDate) {
-      whereClause.sale_date = { [Op.between]: [startDate, endDate] };
+      // Add time to endDate to include the entire day
+      const endDateTime = new Date(endDate);
+      endDateTime.setHours(23, 59, 59, 999);
+      whereClause.sale_date = { 
+        [Op.gte]: startDate,
+        [Op.lte]: endDateTime
+      };
     }
 
     const { count, rows } = await Sales.findAndCountAll({
@@ -136,6 +142,16 @@ const createSale = async (req, res) => {
         })
       );
       await SaleItemsDetail.bulkCreate(saleItems, { transaction: t });
+
+      // Update product quantities
+      const Products = require("../model/ProductModel");
+      for (const item of items) {
+        const product = await Products.findByPk(item.prd_id, { transaction: t });
+        if (product) {
+          const newQty = parseInt(product.qty || 0) - parseInt(item.qty || 0);
+          await product.update({ qty: Math.max(0, newQty) }, { transaction: t });
+        }
+      }
     }
 
     await t.commit();
@@ -221,9 +237,24 @@ const deleteSale = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id } = req.params;
-    const sale = await Sales.findByPk(id);
+    const sale = await Sales.findByPk(id, {
+      include: [{ model: SaleItemsDetail, as: "SaleItemsDetails" }],
+      transaction: t,
+    });
     if (!sale)
       return res.status(404).json({ success: false, message: "Sale not found" });
+
+    // Restore product quantities
+    const Products = require("../model/ProductModel");
+    if (sale.SaleItemsDetails && sale.SaleItemsDetails.length > 0) {
+      for (const item of sale.SaleItemsDetails) {
+        const product = await Products.findByPk(item.prd_id, { transaction: t });
+        if (product) {
+          const newQty = parseInt(product.qty || 0) + parseInt(item.qty || 0);
+          await product.update({ qty: newQty }, { transaction: t });
+        }
+      }
+    }
 
     await SaleItemsDetail.destroy({ where: { sale_id: id }, transaction: t });
     await sale.destroy({ transaction: t });

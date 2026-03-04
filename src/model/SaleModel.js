@@ -1,30 +1,6 @@
-// sale_id
-// VARCHAR
-// invoice_id
-// VARCHAR
-// sale_date
-// DATE
-// amount
-// DOUBLE
-// sub_total
-// DOUBLE
-// tax
-// DECIMAL
-// pay_method
-// VARCHAR
-// create_by
-// VARCHAR
-// created_on
-// DATE
-// changed_by
-// VARCHAR
-// changed_on
-// DATE
-// Comment
-
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const PaymentMethods = require("./PaymentMethodModel");
+
 const Sales = sequelize.define(
   "Sales",
   {
@@ -87,17 +63,5 @@ const Sales = sequelize.define(
     timestamps: false,
   },
 );
-Sales.belongsTo(PaymentMethods, {
-  foreignKey: "pay_method",
-  targetKey: "code",
-  onDelete: "CASCADE",
-});
-
-// Add hasMany relationship for SaleItemsDetail
-Sales.hasMany(require("./SaleItemDetail"), {
-  foreignKey: "sale_id",
-  sourceKey: "sale_id",
-  as: "SaleItemsDetails",
-});
 
 module.exports = Sales;

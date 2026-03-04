@@ -26,21 +26,74 @@ var TelegramRoute = require("./src/route/TelegramRoute");
 //============================================================
 // Load models to establish associations migration to database
 
-require("./src/model/ProductModel");
-require("./src/model/CategoryModel");
-require("./src/model/BrandModel");
-require("./src/model/TelegramModel");
-require("./src/model/CustomerModel");
-require("./src/model/SettingModel");
-require("./src/model/UserModel");
-require("./src/model/StoreInfoModel");
-require("./src/model/GeneralSettingModel");
-require("./src/model/PaymentMethodModel");
-require("./src/model/SaleModel");
-require("./src/model/SaleItemDetail");
-require("./src/model/OrderModel");
-require("./src/model/OrderItem");
-// require("./src/model/");
+const Products = require("./src/model/ProductModel");
+const Categories = require("./src/model/CategoryModel");
+const Brands = require("./src/model/BrandModel");
+const Telegrams = require("./src/model/TelegramModel");
+const Customers = require("./src/model/CustomerModel");
+const Settings = require("./src/model/SettingModel");
+const Users = require("./src/model/UserModel");
+const StoreInfo = require("./src/model/StoreInfoModel");
+const GeneralSettings = require("./src/model/GeneralSettingModel");
+const PaymentMethods = require("./src/model/PaymentMethodModel");
+const Sales = require("./src/model/SaleModel");
+const SaleItemsDetail = require("./src/model/SaleItemDetail");
+const Orders = require("./src/model/OrderModel");
+const OrderItems = require("./src/model/OrderItem");
+
+// Define associations after all models are loaded
+// Note: Products and Brands already have associations defined in their model files
+
+// Sales associations
+Sales.belongsTo(PaymentMethods, {
+  foreignKey: "pay_method",
+  targetKey: "code",
+  onDelete: "CASCADE",
+});
+
+Sales.hasMany(SaleItemsDetail, {
+  foreignKey: "sale_id",
+  sourceKey: "sale_id",
+  as: "SaleItemsDetails",
+});
+
+// SaleItemsDetail associations
+SaleItemsDetail.belongsTo(Sales, {
+  foreignKey: "sale_id",
+  targetKey: "sale_id",
+  onDelete: "CASCADE",
+});
+
+SaleItemsDetail.belongsTo(Products, {
+  foreignKey: "prd_id",
+  targetKey: "prd_id",
+  onDelete: "CASCADE",
+});
+
+// Orders associations
+Orders.belongsTo(Customers, {
+  foreignKey: "customer_id",
+  targetKey: "customer_id",
+  onDelete: "CASCADE",
+});
+
+Orders.hasMany(OrderItems, {
+  foreignKey: "order_id",
+  sourceKey: "order_id",
+  as: "OrderItems",
+});
+
+OrderItems.belongsTo(Orders, {
+  foreignKey: "order_id",
+  targetKey: "order_id",
+  onDelete: "CASCADE",
+});
+
+OrderItems.belongsTo(Products, {
+  foreignKey: "prd_id",
+  targetKey: "prd_id",
+  onDelete: "CASCADE",
+});
 
 // Load models to establish associations migration to database
 //============================================================

@@ -1,9 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 
-const Sales = require('./SaleModel'); 
-const Products = require('./ProductModel'); 
-
 const SaleItemsDetail = sequelize.define("SaleItemsDetail", {
   std_id: {
     type: DataTypes.STRING(25),
@@ -47,18 +44,6 @@ const SaleItemsDetail = sequelize.define("SaleItemsDetail", {
 }, {
   tableName: "tbl_sale_item_detail",
   timestamps: false,
-});
-
-SaleItemsDetail.belongsTo(Sales, {
-  foreignKey: 'sale_id', 
-  targetKey: 'sale_id',
-  onDelete: 'CASCADE', 
-});
-
-SaleItemsDetail.belongsTo(Products, {
-  foreignKey: 'prd_id',
-  targetKey: 'prd_id',
-  onDelete: 'CASCADE', 
 });
 
 module.exports = SaleItemsDetail;
