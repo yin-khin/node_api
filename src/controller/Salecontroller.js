@@ -531,6 +531,37 @@ const createSale = async (req, res) => {
   }
 };
 
+const sendReceiptPhoto = async (req, res) => {
+  try {
+    const { imageData, caption } = req.body;
+
+    if (!imageData) {
+      return res.status(400).json({
+        success: false,
+        message: "Image data is required",
+      });
+    }
+
+    // Convert base64 to buffer
+    const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+
+    const { sendTelegramPhoto } = require("../utils/telegramBot");
+    await sendTelegramPhoto(imageBuffer, caption || '');
+
+    return res.status(200).json({
+      success: true,
+      message: "Receipt photo sent to Telegram successfully",
+    });
+  } catch (error) {
+    console.error("Send receipt photo error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to send receipt photo",
+    });
+  }
+};
+
 const updateSale = async (req, res) => {
   const t = await sequelize.transaction();
 
@@ -706,4 +737,5 @@ module.exports = {
   createSale,
   updateSale,
   deleteSale,
+  sendReceiptPhoto,
 };

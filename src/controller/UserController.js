@@ -98,9 +98,65 @@ const Create = async (req, res) => {
 };
 
 // LOGIN WITH EMAIL AND PASSWORD
+// const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     if (!email || !password) {
+//       return res.status(400).json({
+//         message: "Email and password are required",
+//         isLogin: false,
+//       });
+//     }
+
+//     const userData = await User.findOne({ where: { email } });
+
+//     if (!userData) {
+//       return res.status(401).json({
+//         message: "User not found",
+//         isLogin: false,
+//       });
+//     }
+
+//     const comparePassword = await bcrypt.compare(password, userData.password);
+
+//     if (comparePassword) {
+//       const token = jwt.sign(
+//         {
+//           user_id: userData.user_id,
+//           email: userData.email,
+//           username: userData.username,
+//         },
+//         TOKEN_SECRET,
+//         { expiresIn: "1h" },
+//       );
+
+//       res.json({
+//         message: "Login successful",
+//         token: token,
+//         isLogin: true,
+//         user: {
+//           user_id: userData.user_id,
+//           username: userData.username,
+//           email: userData.email,
+//           status: userData.status,
+//         },
+//       });
+//     } else {
+//       res.status(401).json({
+//         message: "Invalid password",
+//         isLogin: false,
+//       });
+//     }
+//   } catch (err) {
+//     logError("User", err, res);
+//   }
+// };
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log("BODY:", req.body);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -111,6 +167,8 @@ const login = async (req, res) => {
 
     const userData = await User.findOne({ where: { email } });
 
+    console.log("USER:", userData);
+
     if (!userData) {
       return res.status(401).json({
         message: "User not found",
@@ -118,41 +176,45 @@ const login = async (req, res) => {
       });
     }
 
+    if (!userData.password) {
+      console.error("❌ Password field missing in DB");
+      return res.status(500).json({
+        message: "Server error: password missing",
+      });
+    }
+
     const comparePassword = await bcrypt.compare(password, userData.password);
 
-    if (comparePassword) {
-      const token = jwt.sign(
-        {
-          user_id: userData.user_id,
-          email: userData.email,
-          username: userData.username,
-        },
-        TOKEN_SECRET,
-        { expiresIn: "1h" },
-      );
-
-      res.json({
-        message: "Login successful",
-        token: token,
-        isLogin: true,
-        user: {
-          user_id: userData.user_id,
-          username: userData.username,
-          email: userData.email,
-          status: userData.status,
-        },
-      });
-    } else {
-      res.status(401).json({
+    if (!comparePassword) {
+      return res.status(401).json({
         message: "Invalid password",
         isLogin: false,
       });
     }
+
+    const token = jwt.sign(
+      {
+        user_id: userData.user_id,
+        email: userData.email,
+        username: userData.username,
+      },
+      TOKEN_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      isLogin: true,
+    });
+
   } catch (err) {
-    logError("User", err, res);
+    console.error("🔥 LOGIN ERROR:", err); // 👈 THIS IS KEY
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
-
 // UPDATE USER
 const Update = async (req, res) => {
   try {

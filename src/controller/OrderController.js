@@ -3,6 +3,7 @@ const Order = require("../model/OrderModel");
 const OrderItem = require("../model/OrderItem");
 const sequelize = require("../config/db");
 const logError = require("../util/service");
+const { alertOrder } = require("../utils/telegramBot");
 
 // Helper: generate order_id
 const generateOrderId = async () => {
@@ -92,6 +93,8 @@ const getOrderById = async (req, res) => {
 const createOrder = async (req, res) => {
   const t = await sequelize.transaction();
   try {
+    console.log("📦 Creating new order - Request body:", JSON.stringify(req.body, null, 2));
+    
     const {
       email,
       fullname,
@@ -104,8 +107,24 @@ const createOrder = async (req, res) => {
       items = [],
     } = req.body;
 
+    console.log("📦 Extracted data:", {
+      email,
+      fullname,
+      address,
+      postalcode,
+      postalcode_type: typeof postalcode,
+      customer_id,
+      customer_id_length: customer_id?.length,
+      amount,
+      status_payment,
+      created_by,
+      items_count: items.length
+    });
+
     const order_id = await generateOrderId();
     const now = new Date();
+    
+    console.log("📦 Generated order_id:", order_id);
 
     const newOrder = await Order.create(
       {
@@ -123,6 +142,8 @@ const createOrder = async (req, res) => {
       { transaction: t }
     );
 
+    console.log("✅ Order created successfully:", order_id);
+
     if (items.length > 0) {
       const orderItems = items.map((item) => ({
         order_id,
@@ -131,9 +152,23 @@ const createOrder = async (req, res) => {
         qty: item.qty,
       }));
       await OrderItem.bulkCreate(orderItems, { transaction: t });
+      console.log("✅ Order items created:", orderItems.length);
     }
 
     await t.commit();
+    console.log("✅ Transaction committed");
+    
+    // Send Telegram notification after successful order creation
+    try {
+      console.log("📤 Sending Telegram notification...");
+      await alertOrder(newOrder);
+      console.log("✅ Telegram notification sent successfully");
+    } catch (telegramError) {
+      console.error("❌ Failed to send Telegram notification:", telegramError.message);
+      console.error("Stack:", telegramError.stack);
+      // Don't fail the order creation if Telegram notification fails
+    }
+    
     res.status(201).json({
       success: true,
       message: "Order created successfully",

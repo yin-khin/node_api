@@ -144,9 +144,63 @@ const deleteCustomer = async (req, res) => {
   }
 };
 
+// Login customer
+const loginCustomer = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    const customer = await Customers.findOne({ where: { email } });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found",
+      });
+    }
+
+    // Simple password check (in production, use bcrypt)
+    if (customer.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password",
+      });
+    }
+
+    // Don't send password back
+    const customerData = {
+      customer_id: customer.customer_id,
+      fullname: customer.fullname,
+      email: customer.email,
+      phone: customer.phone,
+      photo: customer.photo,
+    };
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      customer: customerData,
+    });
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Login failed",
+      error: e.message,
+    });
+    logError("CustomerController", e, res);
+  }
+};
+
 module.exports = {
   get,
   createCustomer,
   updateCustomer,
   deleteCustomer,
+  loginCustomer,
 };

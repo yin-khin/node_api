@@ -137,7 +137,7 @@ KHQRRoute(app);
 //Route to Controller
 //====================================
 sequelize
-  .sync({ alter: false })
+  .sync({ alter: true })
   .then(() => {
     console.log("Database synced successfully");
     app.listen(3000, function () {

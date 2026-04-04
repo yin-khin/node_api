@@ -1,0 +1,14 @@
+[11/03/2026 17:36:53] Incorrect integer value: 'N/A' for column 'postalcode' at row 1
+[11/03/2026 17:37:42] Incorrect integer value: 'N/A' for column 'postalcode' at row 1
+[11/03/2026 18:35:14] Incorrect integer value: 'N/A' for column 'postalcode' at row 1
+[11/03/2026 18:59:28] Incorrect integer value: 'N/A' for column 'postalcode' at row 1
+[11/03/2026 19:05:31] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:05:50] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:09:40] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:10:47] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:11:53] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:14:08] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:14:24] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:15:17] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:35:34] Data too long for column 'customer_id' at row 1
+[11/03/2026 19:36:35] Data too long for column 'customer_id' at row 1
