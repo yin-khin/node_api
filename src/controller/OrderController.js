@@ -3,7 +3,7 @@ const Order = require("../model/OrderModel");
 const OrderItem = require("../model/OrderItem");
 const sequelize = require("../config/db");
 const logError = require("../util/service");
-const { alertOrder } = require("../utils/telegramBot");
+const { alertNewOrder } = require("../utils/telegramBot");
 
 // Helper: generate order_id
 const generateOrderId = async () => {
@@ -72,17 +72,17 @@ const getOrderById = async (req, res) => {
     const order = await Order.findByPk(id, {
       include: [{ model: OrderItem, as: "OrderItems" }],
     });
-    
+
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Order not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
       });
     }
-    
-    res.status(200).json({ 
-      success: true, 
-      data: order 
+
+    res.status(200).json({
+      success: true,
+      data: order,
     });
   } catch (error) {
     logError("OrderController", error, res);
@@ -94,7 +94,7 @@ const createOrder = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     console.log("📦 Creating new order - Request body:", JSON.stringify(req.body, null, 2));
-    
+
     const {
       email,
       fullname,
@@ -118,12 +118,31 @@ const createOrder = async (req, res) => {
       amount,
       status_payment,
       created_by,
-      items_count: items.length
+      items_count: items.length,
     });
+
+    let final_customer_id = customer_id;
+    let final_created_by = created_by || fullname;
+
+    // If no customer_id, find or create customer
+    if (!customer_id) {
+      console.log("📦 No customer_id provided, finding or creating customer...");
+      const [customer, created] = await Customers.findOrCreate({
+        where: { email },
+        defaults: {
+          fullname,
+          phone: req.body.phone || null,
+          password: null, // No password for guest
+        },
+        transaction: t,
+      });
+      final_customer_id = customer.customer_id;
+      console.log(`✅ Customer ${created ? "created" : "found"}:`, final_customer_id);
+    }
 
     const order_id = await generateOrderId();
     const now = new Date();
-    
+
     console.log("📦 Generated order_id:", order_id);
 
     const newOrder = await Order.create(
@@ -132,14 +151,14 @@ const createOrder = async (req, res) => {
         email,
         fullname,
         address,
-        postalcode,
-        customer_id,
+        postalcode: parseInt(postalcode),
+        customer_id: final_customer_id,
         amount,
         status_payment,
-        created_by,
+        created_by: final_created_by,
         created_on: now,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     console.log("✅ Order created successfully:", order_id);
@@ -157,18 +176,18 @@ const createOrder = async (req, res) => {
 
     await t.commit();
     console.log("✅ Transaction committed");
-    
+
     // Send Telegram notification after successful order creation
     try {
       console.log("📤 Sending Telegram notification...");
-      await alertOrder(newOrder);
+      await alertNewOrder(newOrder, req.body.items || []);
       console.log("✅ Telegram notification sent successfully");
     } catch (telegramError) {
       console.error("❌ Failed to send Telegram notification:", telegramError.message);
       console.error("Stack:", telegramError.stack);
       // Don't fail the order creation if Telegram notification fails
     }
-    
+
     res.status(201).json({
       success: true,
       message: "Order created successfully",
@@ -198,9 +217,9 @@ const updateOrder = async (req, res) => {
 
     const order = await Order.findByPk(id);
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Order not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
       });
     }
 
@@ -215,7 +234,7 @@ const updateOrder = async (req, res) => {
         changed_by,
         changed_on: new Date(),
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     if (items && items.length > 0) {
@@ -241,17 +260,52 @@ const updateOrder = async (req, res) => {
   }
 };
 
+// PUT cancel order (called by /api/orders/:id/cancel)
+const cancelOrder = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findByPk(id, { transaction: t });
+    if (!order) {
+      await t.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    await order.update(
+      {
+        status_payment: "cancelled",
+        changed_on: new Date(),
+      },
+      { transaction: t },
+    );
+
+    await t.commit();
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      data: order,
+    });
+  } catch (error) {
+    await t.rollback();
+    logError("OrderController", error, res);
+  }
+};
+
 // DELETE order
 const deleteOrder = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id } = req.params;
     const order = await Order.findByPk(id);
-    
+
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Order not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
       });
     }
 
@@ -259,9 +313,9 @@ const deleteOrder = async (req, res) => {
     await order.destroy({ transaction: t });
     await t.commit();
 
-    res.status(200).json({ 
-      success: true, 
-      message: "Order deleted successfully" 
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
     });
   } catch (error) {
     await t.rollback();
@@ -275,4 +329,5 @@ module.exports = {
   createOrder,
   updateOrder,
   deleteOrder,
+  cancelOrder,
 };

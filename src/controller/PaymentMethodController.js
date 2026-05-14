@@ -115,7 +115,12 @@ const updatePaymentMethod = async (req, res) => {
     await paymentMethod.update({
       type: type || paymentMethod.type,
       fee: fee !== undefined ? fee : paymentMethod.fee,
-      is_active: status === "Active" ? 1 : status === "Inactive" ? 0 : paymentMethod.is_active,
+      is_active:
+        status === "Active"
+          ? 1
+          : status === "Inactive"
+            ? 0
+            : paymentMethod.is_active,
     });
 
     res.status(200).json({

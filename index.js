@@ -41,6 +41,7 @@ const Sales = require("./src/model/SaleModel");
 const SaleItemsDetail = require("./src/model/SaleItemDetail");
 const Orders = require("./src/model/OrderModel");
 const OrderItems = require("./src/model/OrderItem");
+const KHQROrder = require("./src/model/KHQROrderModel");
 
 // Define associations after all models are loaded
 // Note: Products and Brands already have associations defined in their model files
@@ -137,7 +138,7 @@ KHQRRoute(app);
 //Route to Controller
 //====================================
 sequelize
-  .sync({ alter: true })
+  .sync()
   .then(() => {
     console.log("Database synced successfully");
     app.listen(3000, function () {

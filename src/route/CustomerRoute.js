@@ -17,6 +17,7 @@ var {
 const Customers = (app) => {
   app.get("/api/customers", get);
   app.post("/api/customers", upload.single("photo"), createCustomer);
+  app.post("/api/login", loginCustomer);
   app.post("/api/customers/login", loginCustomer);
   app.put("/api/customers/:id", updateCustomer);
   app.delete("/api/customers/:id", deleteCustomer);

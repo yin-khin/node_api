@@ -14,7 +14,6 @@ const getStockAlertThreshold = async () => {
   }
 };
 
-
 const getAlertSettings = async () => {
   try {
     const settings = await GeneralSetting.findOne();
@@ -43,28 +42,39 @@ const getAlertSettings = async () => {
   }
 };
 
-
 const checkAndAlertStockLevels = async (product) => {
   try {
     const alertSettings = await getAlertSettings();
     const qty = parseInt(product.qty || 0);
 
-    console.log(`\n📊 Checking product: ${product.prd_id} - ${product.prd_name}`);
+    console.log(
+      `\n📊 Checking product: ${product.prd_id} - ${product.prd_name}`,
+    );
     console.log(`   Quantity: ${qty}`);
     console.log(`   Threshold: ${alertSettings.threshold}`);
     console.log(`   Low Stock Enabled: ${alertSettings.lowStockEnabled}`);
-    console.log(`   Out of Stock Enabled: ${alertSettings.unavailableStockEnabled}`);
+    console.log(
+      `   Out of Stock Enabled: ${alertSettings.unavailableStockEnabled}`,
+    );
 
     if (qty === 0 && alertSettings.unavailableStockEnabled) {
       // Out of stock
       console.log(`   ❌ OUT OF STOCK - Sending alert...`);
       await alertOutOfStock(product);
-      console.log(`   ✅ Out of stock alert sent for product: ${product.prd_name}`);
-    } else if (qty <= alertSettings.threshold && qty > 0 && alertSettings.lowStockEnabled) {
+      console.log(
+        `   ✅ Out of stock alert sent for product: ${product.prd_name}`,
+      );
+    } else if (
+      qty <= alertSettings.threshold &&
+      qty > 0 &&
+      alertSettings.lowStockEnabled
+    ) {
       // Low stock (threshold or fewer items)
       console.log(`   ⚠️  LOW STOCK - Sending alert...`);
       await alertLowStock(product);
-      console.log(`   ✅ Low stock alert sent for product: ${product.prd_name}`);
+      console.log(
+        `   ✅ Low stock alert sent for product: ${product.prd_name}`,
+      );
     } else {
       console.log(`   ✓ Stock level OK - No alert needed`);
     }
@@ -72,7 +82,6 @@ const checkAndAlertStockLevels = async (product) => {
     console.error("Error checking stock levels:", error);
   }
 };
-
 
 const checkMultipleProductsStock = async (products) => {
   try {

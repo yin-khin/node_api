@@ -1,0 +1,48 @@
+[07/05/2026 22:50:41] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 22:50:44] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 22:51:39] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 22:52:01] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:03:25] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:13:18] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:13:24] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:13:25] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:13:29] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:16:56] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:16:59] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:17:08] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:37:57] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:39:46] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:40:01] notNull Violation: Order.customer_id cannot be null,
+notNull Violation: Order.created_by cannot be null
+[07/05/2026 23:43:14] Cannot add or update a child row: a foreign key constraint fails (`node_db`.`tbl_order`, CONSTRAINT `tbl_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `tbl_customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE)
+[07/05/2026 23:44:02] Cannot add or update a child row: a foreign key constraint fails (`node_db`.`tbl_order`, CONSTRAINT `tbl_order_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `tbl_customer` (`customer_id`) ON DELETE CASCADE ON UPDATE CASCADE)
+[07/05/2026 23:48:01] Customers is not defined
+[07/05/2026 23:48:07] Customers is not defined
+[07/05/2026 23:48:30] Customers is not defined
+[07/05/2026 23:48:36] Customers is not defined
+[07/05/2026 23:49:04] Customers is not defined
+[07/05/2026 23:50:00] Customers is not defined
+[07/05/2026 23:51:32] Customers is not defined
+[07/05/2026 23:52:01] Customers is not defined
+[07/05/2026 23:52:24] Customers is not defined
+[07/05/2026 23:52:30] Customers is not defined
+[07/05/2026 23:54:24] Customers is not defined
+[07/05/2026 23:54:34] Customers is not defined
+[07/05/2026 23:58:05] Customers is not defined
+[07/05/2026 23:58:06] Customers is not defined
+[07/05/2026 23:58:07] Customers is not defined
+[07/05/2026 23:58:19] Customers is not defined
